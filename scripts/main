@@ -53,6 +53,8 @@ pushd "$build_dir" >/dev/null
     ${NICE} make -j"${JOBS}" 2>&1 | log "build.log"
     ${NICE} make install 2>&1 | log "build.log"
 
+    sed -i "s|prefix=${INSTALL_DIR}|prefix=\$\{pcfiledir\}/../..|g" "${INSTALL_DIR}/lib/pkgconfig/zlib.pc"
+
     cp "build.log" "${INSTALL_DIR}/"
 
     package "${INSTALL_DIR}" "${outdir}/zlib-${VERSION}-static-${build_time}.tar.xz"
