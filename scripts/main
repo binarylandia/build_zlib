@@ -32,20 +32,6 @@ function package() {
     | ${NICE} xz -T0 -k > "${output_tarball}"
 }
 
-write_version() {
-  filepath="${1}"
-
-  cat > "$filepath" << EOF
-${ZLIB_REPO_URL}
-${BRANCH}
-$(git rev-parse HEAD)
-$(git describe --always --dirty)
-$(git describe --always --dirty --tags)
-$(git describe --always --dirty --tags --all)
-${build_time}
-EOF
-}
-
 build_dir="$(abspath ${BUILD_DIR})"
 mkdir -p "${build_dir}"
 outdir="$(abspath "${OUT_DIR}")"
@@ -58,24 +44,6 @@ pushd "$build_dir" >/dev/null
     git clone --recursive --depth=100 -b "${BRANCH}" "${ZLIB_REPO_URL}" "${src_dir}"
   fi
 
-  export CFLAGS="-w -g0 -fPIC --static -static -Bstatic --sysroot=/usr ${CFLAGS:+:CFLAGS}"
-  export CXXFLAGS="-w -g0 -fPIC --static -static -Bstatic --sysroot=/usr ${CXXFLAGS:+:CXXFLAGS}"
-  export LDFLAGS="-w --static -static -static-libgcc --sysroot=/usr ${LDFLAGS:+:LDFLAGS}"
-
-  export CC="/usr/bin/x86_64-unknown-linux-musl-gcc"
-  export CXX="/usr/bin/x86_64-unknown-linux-musl-g++"
-  export FC="/usr/bin/x86_64-unknown-linux-musl-gfortran"
-  export AR="/usr/bin/x86_64-unknown-linux-musl-ar"
-  export AS="/usr/bin/x86_64-unknown-linux-musl-as"
-  export LD="/usr/bin/x86_64-unknown-linux-musl-ld"
-  export NM="/usr/bin/x86_64-unknown-linux-musl-nm"
-  export OBJCOPY="/usr/bin/x86_64-unknown-linux-musl-objcopy"
-  export OBJDUMP="/usr/bin/x86_64-unknown-linux-musl-objdump"
-  export RANLIB="/usr/bin/x86_64-unknown-linux-musl-ranlib"
-  export STRIP="/usr/bin/x86_64-unknown-linux-musl-strip"
-
-  export host_alias="x86_64-unknown-linux-musl"
-
   pushd "${src_dir}" >/dev/null
     ${NICE} ./configure \
       --prefix="${INSTALL_DIR}" \
@@ -85,7 +53,6 @@ pushd "$build_dir" >/dev/null
     ${NICE} make -j"${JOBS}" 2>&1 | log "build.log"
     ${NICE} make install 2>&1 | log "build.log"
 
-    write_version "${INSTALL_DIR}/version.txt"
     cp "build.log" "${INSTALL_DIR}/"
 
     package "${INSTALL_DIR}" "${outdir}/zlib-${VERSION}-static-${build_time}.tar.xz"
