@@ -15,6 +15,18 @@ JOBS="${JOBS:=$(($(nproc --all) + 2))}"
 
 build_time="$(date '+%Y%m%d%H%M%S')"
 
+export CFLAGS="-w -g0 -O2 ${CFLAGS:-}"
+export CXXFLAGS="-w -g0 -O2 ${CXXFLAGS:-}"
+export LDFLAGS="-s ${LDFLAGS:-}"
+
+export CFLAGS="-static-libgcc -static-libstdc++ ${CFLAGS:-}"
+export CXXFLAGS="-static-libgcc -static-libstdc++ ${CXXFLAGS:-}"
+export LDFLAGS="-static-libgcc -static-libstdc++ ${LDFLAGS:-}"
+
+export CFLAGS="-fPIC ${CFLAGS:-}"
+export CXXFLAGS="-fPIC ${CXXFLAGS:-}"
+export LDFLAGS="-fPIC ${LDFLAGS:-}"
+
 function abspath() {
   readlink -m "$1"
 }
